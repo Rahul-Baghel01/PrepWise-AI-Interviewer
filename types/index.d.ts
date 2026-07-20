@@ -2,14 +2,12 @@ interface Feedback {
   id: string;
   interviewId: string;
   totalScore: number;
-  categoryScores: Array<{
-    name: string;
-    score: number;
-    comment: string;
-  }>;
+  categoryScores: Array<{ name: string; score: number; comment: string }>;
   strengths: string[];
   areasForImprovement: string[];
   finalAssessment: string;
+  studyPlan?: Array<{ week: string; focus: string; outcome: string }>;
+  speakingCoach?: { paceWpm: number; fillerWords: number; confidence: number; grammar: number; notes: string };
   createdAt: string;
 }
 
@@ -23,11 +21,14 @@ interface Interview {
   userId: string;
   type: string;
   finalized: boolean;
+  coverImage?: string;
+  company?: string;
+  companyProfile?: { style: string; focus: string; principles: string[] };
+  resumeContext?: string;
 }
 
 interface CreateFeedbackParams {
   interviewId: string;
-  userId: string;
   transcript: { role: string; content: string }[];
   feedbackId?: string;
 }
@@ -45,6 +46,10 @@ interface InterviewCardProps {
   type: string;
   techstack: string[];
   createdAt?: string;
+  coverImage?: string;
+  questionCount?: number;
+  estimatedDuration?: string;
+  difficulty?: string;
 }
 
 interface AgentProps {
@@ -52,8 +57,9 @@ interface AgentProps {
   userId?: string;
   interviewId?: string;
   feedbackId?: string;
-  type: "generate" | "interview";
   questions?: string[];
+  company?: string;
+  companyProfile?: { style: string; focus: string; principles: string[] };
 }
 
 interface RouteParams {
@@ -85,15 +91,42 @@ interface SignUpParams {
 
 type FormType = "sign-in" | "sign-up";
 
-interface InterviewFormProps {
-  interviewId: string;
-  role: string;
-  level: string;
-  type: string;
-  techstack: string[];
-  amount: number;
-}
-
 interface TechIconProps {
   techStack: string[];
+}
+
+interface ResumeExperienceItem {
+  company: string;
+  role: string;
+  duration: string;
+  description: string;
+}
+
+interface ResumeProjectItem {
+  name: string;
+  techStack: string[];
+  description: string;
+}
+
+interface ResumeEducationItem {
+  degree: string;
+  college: string;
+  year: string;
+}
+
+interface ResumeAnalysis {
+  name: string;
+  summary: string;
+  skills: string[];
+  languages: string[];
+  frameworks: string[];
+  databases: string[];
+  cloud: string[];
+  tools: string[];
+  experience: ResumeExperienceItem[];
+  projects: ResumeProjectItem[];
+  education: ResumeEducationItem[];
+  certifications: string[];
+  achievements: string[];
+  strengths: string[];
 }

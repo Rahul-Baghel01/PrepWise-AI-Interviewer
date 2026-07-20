@@ -13,13 +13,14 @@ import { getCurrentUser } from "@/lib/actions/auth.action";
 const Feedback = async ({ params }: RouteParams) => {
   const { id } = await params;
   const user = await getCurrentUser();
+  if (!user) redirect("/sign-in");
 
   const interview = await getInterviewById(id);
   if (!interview) redirect("/");
 
   const feedback = await getFeedbackByInterviewId({
     interviewId: id,
-    userId: user?.id!,
+    userId: user.id,
   });
 
   return (
@@ -82,6 +83,33 @@ const Feedback = async ({ params }: RouteParams) => {
           ))}
         </ul>
       </div>
+
+      {feedback?.speakingCoach && (
+        <div className="flex flex-col gap-3">
+          <h3>Speech coach</h3>
+          <div className="grid gap-3 sm:grid-cols-4">
+            <p>Speaking pace: <span className="font-bold">{feedback.speakingCoach.paceWpm} WPM</span></p>
+            <p>Confidence: <span className="font-bold">{feedback.speakingCoach.confidence}%</span></p>
+            <p>Grammar: <span className="font-bold">{feedback.speakingCoach.grammar}%</span></p>
+            <p>Filler words: <span className="font-bold">{feedback.speakingCoach.fillerWords}</span></p>
+          </div>
+          <p>{feedback.speakingCoach.notes}</p>
+        </div>
+      )}
+
+      {feedback?.studyPlan && feedback.studyPlan.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <h3>Personalized study plan</h3>
+          <div className="grid gap-3 md:grid-cols-2">
+            {feedback.studyPlan.map((item) => (
+              <div key={item.week} className="rounded-xl bg-dark-200 p-4">
+                <p className="font-bold text-primary-200">{item.week}: {item.focus}</p>
+                <p className="mt-1">{item.outcome}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col gap-3">
         <h3>Areas for Improvement</h3>

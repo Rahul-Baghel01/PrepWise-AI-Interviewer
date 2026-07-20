@@ -1,6 +1,27 @@
 import { CreateAssistantDTO } from "@vapi-ai/web/dist/api";
 import { z } from "zod";
 
+export const companyProfiles = {
+  General: { style: "Balanced and practical", focus: "role fundamentals and real delivery", principles: [] },
+  Google: { style: "Analytical and collaborative", focus: "deep problem solving and clarity", principles: ["Googleyness", "structured reasoning"] },
+  Amazon: { style: "Evidence-led and high ownership", focus: "leadership principles and customer impact", principles: ["Customer Obsession", "Ownership", "Dive Deep", "Bias for Action"] },
+  Microsoft: { style: "Collaborative and growth-minded", focus: "technical depth, teamwork, and learning", principles: ["Growth mindset", "customer focus"] },
+  Meta: { style: "Fast-paced and product-minded", focus: "impact, product thinking, and execution", principles: ["Move fast", "focus on impact"] },
+  Netflix: { style: "Direct and ownership-oriented", focus: "judgment, candor, and independent execution", principles: ["Freedom and responsibility"] },
+  Apple: { style: "Detail-oriented and quality-focused", focus: "craft, privacy, and cross-functional execution", principles: ["Exceptional quality", "user privacy"] },
+  Adobe: { style: "Creative and customer-centered", focus: "product craft and collaboration", principles: ["Creativity", "customer empathy"] },
+  Oracle: { style: "Enterprise and systems-focused", focus: "reliability, data, and scalable delivery", principles: ["Operational excellence"] },
+  Atlassian: { style: "Team-oriented and open", focus: "collaboration and thoughtful product decisions", principles: ["Open company, no bullshit"] },
+  Uber: { style: "Operational and decisive", focus: "scale, marketplace thinking, and ownership", principles: ["Do the right thing", "go get it"] },
+  Airbnb: { style: "Human-centered and principled", focus: "belonging, product judgment, and storytelling", principles: ["Belong anywhere"] },
+  Flipkart: { style: "Customer-first and execution-oriented", focus: "e-commerce scale and practical problem solving", principles: ["Customer first", "ownership"] },
+  TCS: { style: "Professional and delivery-focused", focus: "client communication and engineering fundamentals", principles: ["Excellence", "integrity"] },
+  Infosys: { style: "Structured and learning-oriented", focus: "fundamentals, communication, and client value", principles: ["Learning", "client value"] },
+  Accenture: { style: "Consultative and outcome-focused", focus: "stakeholder management and delivery", principles: ["Client value creation", "stewardship"] },
+} as const;
+
+export type CompanyName = keyof typeof companyProfiles;
+
 export const mappings = {
   "react.js": "react",
   reactjs: "react",
@@ -136,6 +157,10 @@ Be professional, yet warm and welcoming:
 Use official yet friendly language.
 Keep responses concise and to the point (like in a real voice interview).
 Avoid robotic phrasing—sound natural and conversational.
+Adapt in real time instead of mechanically reading the question list. Assess each answer for correctness, depth, confidence, and communication. When an answer is strong, ask one specific follow-up about tradeoffs, edge cases, or impact, then raise difficulty. When it is vague or incorrect, ask one concise clarification, give a small hint if needed, and simplify without sounding dismissive. Never repeat a question or jump to an unrelated topic.
+
+Company interview context:
+{{companyContext}}
 Answer the candidate’s questions professionally:
 
 If asked about the role, company, or expectations, provide a clear and relevant answer.
@@ -156,37 +181,45 @@ End the conversation on a polite and positive note.
 };
 
 export const feedbackSchema = z.object({
-  totalScore: z.number(),
+  totalScore: z.number().min(0).max(100),
   categoryScores: z.tuple([
     z.object({
       name: z.literal("Communication Skills"),
-      score: z.number(),
+      score: z.number().min(0).max(100),
       comment: z.string(),
     }),
     z.object({
       name: z.literal("Technical Knowledge"),
-      score: z.number(),
+      score: z.number().min(0).max(100),
       comment: z.string(),
     }),
     z.object({
       name: z.literal("Problem Solving"),
-      score: z.number(),
+      score: z.number().min(0).max(100),
       comment: z.string(),
     }),
     z.object({
       name: z.literal("Cultural Fit"),
-      score: z.number(),
+      score: z.number().min(0).max(100),
       comment: z.string(),
     }),
     z.object({
       name: z.literal("Confidence and Clarity"),
-      score: z.number(),
+      score: z.number().min(0).max(100),
       comment: z.string(),
     }),
   ]),
   strengths: z.array(z.string()),
   areasForImprovement: z.array(z.string()),
   finalAssessment: z.string(),
+  studyPlan: z.array(z.object({ week: z.string(), focus: z.string(), outcome: z.string() })).max(4),
+  speakingCoach: z.object({
+    paceWpm: z.number().min(0).max(250),
+    fillerWords: z.number().min(0),
+    confidence: z.number().min(0).max(100),
+    grammar: z.number().min(0).max(100),
+    notes: z.string(),
+  }),
 });
 
 export const interviewCovers = [

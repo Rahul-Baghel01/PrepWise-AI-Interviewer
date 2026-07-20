@@ -1,11 +1,8 @@
 import dayjs from "dayjs";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 
 import { Button } from "./ui/button";
-import DisplayTechIcons from "./DisplayTechIcons";
-
-import { cn, getRandomInterviewCover } from "@/lib/utils";
 import { getFeedbackByInterviewId } from "@/lib/actions/general.action";
 
 const InterviewCard = async ({
@@ -15,96 +12,53 @@ const InterviewCard = async ({
   type,
   techstack,
   createdAt,
+  coverImage,
+  questionCount,
+  estimatedDuration,
+  difficulty,
 }: InterviewCardProps) => {
-  const feedback =
-    userId && interviewId
-      ? await getFeedbackByInterviewId({
-          interviewId,
-          userId,
-        })
-      : null;
-
+  const feedback = userId && interviewId
+    ? await getFeedbackByInterviewId({ interviewId, userId })
+    : null;
+  const formattedDate = dayjs(feedback?.createdAt || createdAt || Date.now()).format("MMM D, YYYY");
   const normalizedType = /mix/gi.test(type) ? "Mixed" : type;
-
-  const badgeColor =
-    {
-      Behavioral: "bg-light-400",
-      Mixed: "bg-light-600",
-      Technical: "bg-light-800",
-    }[normalizedType] || "bg-light-600";
-
-  const formattedDate = dayjs(
-    feedback?.createdAt || createdAt || Date.now()
-  ).format("MMM D, YYYY");
+  const count = questionCount ?? 10;
+  const duration = estimatedDuration ?? `${Math.max(15, count * 2)} min`;
 
   return (
-    <div className="card-border w-[360px] max-sm:w-full min-h-96">
-      <div className="card-interview">
-        <div>
-          {/* Type Badge */}
-          <div
-            className={cn(
-              "absolute top-0 right-0 w-fit px-4 py-2 rounded-bl-lg",
-              badgeColor
-            )}
-          >
-            <p className="badge-text ">{normalizedType}</p>
+    <article className="group relative flex min-h-[370px] w-full max-w-[370px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-dark-300/60 p-1 shadow-xl shadow-dark-100/30 transition duration-300 hover:-translate-y-1 hover:border-primary-200/40 hover:shadow-primary-200/10 max-lg:max-w-none">
+      <div className="relative flex min-h-full flex-1 flex-col overflow-hidden rounded-[22px] bg-gradient-to-b from-[#1A1C20] to-[#08090D] p-5">
+        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-primary-200/10 to-transparent" />
+        <div className="relative flex items-start justify-between gap-3">
+          <Image src={coverImage || "/covers/adobe.png"} alt="" width={64} height={64} className="size-16 rounded-2xl border border-white/10 bg-dark-200 object-cover shadow-lg" />
+          <div className="flex flex-col items-end gap-2">
+            <span className="rounded-full bg-light-600 px-2.5 py-1 text-xs font-semibold text-primary-100">{normalizedType}</span>
+            {difficulty && <span className="rounded-full border border-primary-200/25 bg-primary-200/10 px-2.5 py-1 text-xs font-semibold text-primary-100">{difficulty}</span>}
           </div>
-
-          {/* Cover Image */}
-          <Image
-            src={getRandomInterviewCover()}
-            alt="cover-image"
-            width={90}
-            height={90}
-            className="rounded-full object-fit size-[90px]"
-          />
-
-          {/* Interview Role */}
-          <h3 className="mt-5 capitalize">{role} Interview</h3>
-
-          {/* Date & Score */}
-          <div className="flex flex-row gap-5 mt-3">
-            <div className="flex flex-row gap-2">
-              <Image
-                src="/calendar.svg"
-                width={22}
-                height={22}
-                alt="calendar"
-              />
-              <p>{formattedDate}</p>
-            </div>
-
-            <div className="flex flex-row gap-2 items-center">
-              <Image src="/star.svg" width={22} height={22} alt="star" />
-              <p>{feedback?.totalScore || "---"}/100</p>
-            </div>
-          </div>
-
-          {/* Feedback or Placeholder Text */}
-          <p className="line-clamp-2 mt-5">
-            {feedback?.finalAssessment ||
-              "You haven't taken this interview yet. Take it now to improve your skills."}
-          </p>
         </div>
 
-        <div className="flex flex-row justify-between">
-          <DisplayTechIcons techStack={techstack} />
+        <div className="relative mt-5">
+          <h3 className="text-xl font-semibold capitalize text-white">{role} Interview</h3>
+          <p className="mt-2 line-clamp-2 text-sm leading-6 text-light-400">{feedback?.finalAssessment || "A focused practice session tailored to build confidence for your next interview."}</p>
+        </div>
 
-          <Button className="btn-primary">
-            <Link
-              href={
-                feedback
-                  ? `/interview/${interviewId}/feedback`
-                  : `/interview/${interviewId}`
-              }
-            >
-              {feedback ? "Check Feedback" : "View Interview"}
-            </Link>
+        <div className="relative mt-5 flex flex-wrap gap-2">
+          {techstack.slice(0, 3).map((technology) => <span key={technology} className="rounded-full border border-white/10 bg-dark-200/70 px-2.5 py-1 text-xs text-light-100">{technology}</span>)}
+        </div>
+
+        <div className="relative mt-auto grid grid-cols-2 gap-3 border-t border-white/10 pt-5 text-sm text-light-400">
+          <div><p className="text-xs uppercase tracking-wider text-light-600">Questions</p><p className="mt-1 font-semibold text-light-100">{count}</p></div>
+          <div><p className="text-xs uppercase tracking-wider text-light-600">Duration</p><p className="mt-1 font-semibold text-light-100">{duration}</p></div>
+        </div>
+
+        <div className="relative mt-4 flex items-center justify-between gap-3">
+          <p className="text-xs text-light-400">{feedback ? `Feedback · ${formattedDate}` : formattedDate}</p>
+          <Button asChild className="btn-primary !min-h-9 !px-4 !text-xs">
+            <Link href={feedback ? `/interview/${interviewId}/feedback` : `/interview/${interviewId}`}>{feedback ? "Feedback" : "Open"}</Link>
           </Button>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 
